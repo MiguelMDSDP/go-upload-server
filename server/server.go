@@ -31,7 +31,6 @@ func (http_server *HTTPServer) InitHTTPServer(address string) error {
 
 
 func (http_server *HTTPServer) RunHTTPServer() error {
-	log.Print("OHYEAH")
 	err := http.ListenAndServe(http_server.listening_adress, http_server.router)
 	if err != nil {
 		return err
