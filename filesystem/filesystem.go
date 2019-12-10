@@ -32,7 +32,7 @@ func (file_system *FileSystem) InitFileSystem(rootPath string) error {
 	file_system.rootPath = rootPath
 
 	// Creates the general upload-server log file.
-	logFile, err := os.Create(file_system.rootPath + "/daemon.log")
+	logFile, err := os.Create(file_system.rootPath + "/upload-server.log")
 	if err != nil {
 		return err
 	}

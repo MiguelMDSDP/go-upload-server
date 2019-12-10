@@ -3,7 +3,6 @@ package main
 
 
 import (
-	"os"
 	"fmt"
 	"log"
 	"github.com/MiguelMDSDP/upload-server/filesystem"
@@ -36,7 +35,7 @@ func NewUploadServer() *UploadServer {
 
 
 func (upload_server *UploadServer) InitUploadServer() error {
-	if err := upload_server.file_system.InitFileSystem(os.Getenv("HOME") + "/.ds"); err != nil {
+	if err := upload_server.file_system.InitFileSystem("/.data"); err != nil {
 		return err
 	}
 	if err := upload_server.http_server.InitHTTPServer(":8080"); err != nil {
