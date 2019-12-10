@@ -36,3 +36,8 @@ func (http_server *HTTPServer) RunHTTPServer() error {
 	}
 	return nil
 }
+
+
+func (http_server *HTTPServer) StopHTTPServer() {
+	log.Print("**Shutting down the http server.")
+}

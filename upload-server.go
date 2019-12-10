@@ -3,6 +3,7 @@ package main
 
 
 import (
+	"os"
 	"fmt"
 	"log"
 	"github.com/MiguelMDSDP/upload-server/filesystem"
@@ -14,7 +15,7 @@ import (
 type UploadServer struct {
 	// Native
 	file_system *filesystem.FileSystem
-	http_server *httpserver.HTTPServer
+	http_server *server.HTTPServer
 	//Error Channels
 	http_error_channel chan error
 }
@@ -34,17 +35,18 @@ func NewUploadServer() *UploadServer {
 }
 
 
-func InitUploadServer() {
+func (upload_server *UploadServer) InitUploadServer() error {
 	if err := upload_server.file_system.InitFileSystem(os.Getenv("HOME") + "/.ds"); err != nil {
 		return err
 	}
 	if err := upload_server.http_server.InitHTTPServer(":8080"); err != nil {
 		return err
 	}
+	return nil
 }
 
 
-func RunUploadServer() {
+func (upload_server *UploadServer) RunUploadServer() error {
 	go upload_server.http_server.RunHTTPServer()
 	
 	log.Print("===== Upload Server Started =====")

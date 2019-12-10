@@ -1,4 +1,4 @@
-module git.furg.br/MiguelMDSDP/upload-server
+module github.com/MiguelMDSDP/upload-server
 
 go 1.13
 

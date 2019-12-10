@@ -46,6 +46,13 @@ func (file_system *FileSystem) InitFileSystem(rootPath string) error {
 }
 
 
+func (file_system *FileSystem) StopFileSystem() {
+	if err := file_system.logFile.Close(); err != nil {
+		log.Fatal(err.Error())
+	}
+}
+
+
 func (file_system *FileSystem) CreateDirIfNotExists(path string) error {
 	_, err := os.Stat(path)
 	if err != nil {
