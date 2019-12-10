@@ -40,5 +40,6 @@ Now, you just have to run the main application and live-server in different term
 
 ## References
 
-- https://github.com/gorilla/mux
 - https://gist.github.com/donmccurdy/20fb112949324c92c5e8
+- https://github.com/gorilla/mux
+- https://tutorialedge.net/golang/go-file-upload-tutorial/
