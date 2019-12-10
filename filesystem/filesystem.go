@@ -24,6 +24,7 @@ func NewFileSystem() *FileSystem {
 
 
 func (file_system *FileSystem) InitFileSystem(rootPath string) error {
+	log.Print("AQUI")
 	// Create root path.
 	err := file_system.CreateDirIfNotExists(rootPath)
 	if err != nil {
