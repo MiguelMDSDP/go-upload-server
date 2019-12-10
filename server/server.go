@@ -26,6 +26,7 @@ func NewHTTPServer() *HTTPServer {
 func (http_server *HTTPServer) InitHTTPServer(address string) error {
 	http_server.router = mux.NewRouter()
 	http_server.router.HandleFunc("/upload", UploadHandler).Methods("POST")
+	http_server.listening_adress = address
 	return nil
 }
 
