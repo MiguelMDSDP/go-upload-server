@@ -1,16 +1,13 @@
 package main
 
-
-
 import "log"
 
-
 func main() {
-	upload_server := NewUploadServer()
-	if err := upload_server.InitUploadServer(); err != nil {
+	uploadServer := NewUploadServer()
+	if err := uploadServer.Init(); err != nil {
 		log.Fatal(err.Error())
 	}
-	if err := upload_server.RunUploadServer(); err != nil {
+	if err := uploadServer.Run(); err != nil {
 		log.Fatal(err.Error())
 	}
 }

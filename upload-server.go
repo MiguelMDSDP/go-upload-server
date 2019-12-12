@@ -1,68 +1,65 @@
 package main
 
-
-
 import (
 	"fmt"
 	"log"
+
 	"github.com/MiguelMDSDP/upload-server/filesystem"
 	"github.com/MiguelMDSDP/upload-server/server"
 )
 
-
-
+// UploadServer - Upload server data structure
 type UploadServer struct {
 	// Native
-	file_system *filesystem.FileSystem
-	http_server *server.HTTPServer
+	fileSystem *filesystem.FileSystem
+	httpServer *server.HTTPServer
 	//Error Channels
-	http_error_channel chan error
+	httpErrChan chan error
 }
 
-
-
+// NewUploadServer creates new UploadServer objects
 func NewUploadServer() *UploadServer {
-	upload_server := new(UploadServer)
+	uploadServer := new(UploadServer)
 
 	// Native
-	upload_server.file_system = filesystem.NewFileSystem()
-	upload_server.http_server = server.NewHTTPServer()
+	uploadServer.fileSystem = filesystem.NewFileSystem()
+	uploadServer.httpServer = server.NewHTTPServer()
 	// Erros Channels
-	upload_server.http_error_channel = make(chan error)
+	uploadServer.httpErrChan = make(chan error)
 
-	return upload_server
+	return uploadServer
 }
 
-
-func (upload_server *UploadServer) InitUploadServer() error {
-	if err := upload_server.file_system.InitFileSystem(".data"); err != nil {
+// Init initiates the UploadServer object
+func (uploadServer *UploadServer) Init() error {
+	if err := uploadServer.fileSystem.Init(".data"); err != nil {
 		return err
 	}
-	if err := upload_server.http_server.InitHTTPServer(":8080"); err != nil {
+	if err := uploadServer.httpServer.Init(":8080"); err != nil {
 		return err
 	}
 	return nil
 }
 
+// Run starts the UploadServer execution
+func (uploadServer *UploadServer) Run() error {
+	go uploadServer.httpServer.Run()
 
-func (upload_server *UploadServer) RunUploadServer() error {
-	go upload_server.http_server.RunHTTPServer()
-	
 	log.Print("===== Upload Server Started =====")
 
 	for {
 		select {
-			case err := <-upload_server.http_error_channel:
-				if err != nil {
-					return fmt.Errorf("%s: %s", "HTTP", err.Error())
-				}
+		case err := <-uploadServer.httpErrChan:
+			if err != nil {
+				return fmt.Errorf("%s: %s", "HTTP", err.Error())
+			}
 		}
 	}
 }
 
-
-func (upload_server *UploadServer) StopUploadServer() {
-	upload_server.file_system.StopFileSystem()
-	upload_server.http_server.StopHTTPServer()
-	close(upload_server.http_error_channel)
+// Stop stalls the UploadServer execution
+func (uploadServer *UploadServer) Stop() {
+	uploadServer.fileSystem.Stop()
+	uploadServer.httpServer.Stop()
+	close(uploadServer.httpErrChan)
 }

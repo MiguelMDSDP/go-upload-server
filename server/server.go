@@ -1,45 +1,42 @@
 package server
 
-
-
 import (
 	"log"
 	"net/http"
+
 	"github.com/gorilla/mux"
 )
 
-
-
+// HTTPServer - Type Definition
 type HTTPServer struct {
-	listening_adress string
-	router *mux.Router
+	listeningAdress string
+	router          *mux.Router
 }
 
-
-
+// NewHTTPServer creates HTTPServer objects
 func NewHTTPServer() *HTTPServer {
-	http_server := new(HTTPServer)
-	return http_server
+	httpServer := new(HTTPServer)
+	return httpServer
 }
 
-
-func (http_server *HTTPServer) InitHTTPServer(address string) error {
-	http_server.router = mux.NewRouter()
-	http_server.router.HandleFunc("/upload", UploadHandler).Methods("POST")
-	http_server.listening_adress = address
+// Init initiates the HTTPServer
+func (httpServer *HTTPServer) Init(address string) error {
+	httpServer.router = mux.NewRouter()
+	httpServer.router.HandleFunc("/upload", UploadHandler).Methods("POST")
+	httpServer.listeningAdress = address
 	return nil
 }
 
-
-func (http_server *HTTPServer) RunHTTPServer() error {
-	err := http.ListenAndServe(http_server.listening_adress, http_server.router)
+// Run starts the HTTPServer execution
+func (httpServer *HTTPServer) Run() error {
+	err := http.ListenAndServe(httpServer.listeningAdress, httpServer.router)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-
-func (http_server *HTTPServer) StopHTTPServer() {
+// Stop stalls the HTTPServer execution
+func (httpServer *HTTPServer) Stop() {
 	log.Print("**Shutting down the http server.")
 }

@@ -1,38 +1,34 @@
 package filesystem
 
-
-
 import (
 	"io"
 	"log"
 	"os"
 )
 
-
-
+// FileSystem - Filesystem data structure
 type FileSystem struct {
 	rootPath string
 	logFile  *os.File
 }
 
-
-
+// NewFileSystem creates new FileSystem objects
 func NewFileSystem() *FileSystem {
-	file_system := new(FileSystem)
-	return file_system
+	fileSystem := new(FileSystem)
+	return fileSystem
 }
 
-
-func (file_system *FileSystem) InitFileSystem(rootPath string) error {
+// Init initiates the FileSystem
+func (fileSystem *FileSystem) Init(rootPath string) error {
 	// Create root path.
-	err := file_system.CreateDirIfNotExists(rootPath)
+	err := fileSystem.CreateDirIfNotExists(rootPath)
 	if err != nil {
 		return err
 	}
-	file_system.rootPath = rootPath
+	fileSystem.rootPath = rootPath
 
 	// Creates the general upload-server log file.
-	logFile, err := os.Create(file_system.rootPath + "/upload-server.log")
+	logFile, err := os.Create(fileSystem.rootPath + "/upload-server.log")
 	if err != nil {
 		return err
 	}
@@ -40,20 +36,20 @@ func (file_system *FileSystem) InitFileSystem(rootPath string) error {
 	// Redirects log for Stdout and the created log file.
 	writer := io.MultiWriter(os.Stdout, logFile)
 	log.SetOutput(writer)
-	file_system.logFile = logFile
+	fileSystem.logFile = logFile
 
 	return nil
 }
 
-
-func (file_system *FileSystem) StopFileSystem() {
-	if err := file_system.logFile.Close(); err != nil {
+// Stop destroys the FileSystem
+func (fileSystem *FileSystem) Stop() {
+	if err := fileSystem.logFile.Close(); err != nil {
 		log.Fatal(err.Error())
 	}
 }
 
-
-func (file_system *FileSystem) CreateDirIfNotExists(path string) error {
+// CreateDirIfNotExists creates the dir "path" if it doesn't exists
+func (fileSystem *FileSystem) CreateDirIfNotExists(path string) error {
 	_, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
