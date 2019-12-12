@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -29,7 +30,11 @@ func (httpServer *HTTPServer) Init(address string) error {
 
 // Run starts the HTTPServer execution
 func (httpServer *HTTPServer) Run() error {
-	err := http.ListenAndServe(httpServer.listeningAdress, httpServer.router)
+	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With"})
+	originsOk := handlers.AllowedOrigins([]string{"*"})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+	err := http.ListenAndServe(httpServer.listeningAdress, handlers.CORS(
+		headersOk, originsOk, methodsOk)(httpServer.router))
 	if err != nil {
 		return err
 	}

@@ -19,6 +19,10 @@ func UploadHandler(writer http.ResponseWriter, request *http.Request) {
 	// 	writer.WriteHeader(http.StatusBadRequest)
 	// 	return
 	// }
+	err := request.ParseMultipartForm(32 << 20) // 32Mb
+	if err != nil {
+			http.Error(writer, err.Error(), http.StatusBadRequest)
+	}
 	file, _, err := request.FormFile("file")
 	defer file.Close()
 	if err != nil {

@@ -35,7 +35,7 @@ func (uploadServer *UploadServer) Init() error {
 	if err := uploadServer.fileSystem.Init(".data"); err != nil {
 		return err
 	}
-	if err := uploadServer.httpServer.Init(":8080"); err != nil {
+	if err := uploadServer.httpServer.Init(":8000"); err != nil {
 		return err
 	}
 	return nil
