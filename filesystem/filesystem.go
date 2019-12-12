@@ -1,34 +1,37 @@
 package filesystem
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"os"
+	"path/filepath"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 // FileSystem - Filesystem data structure
 type FileSystem struct {
 	rootPath string
 	logFile  *os.File
+	indexes  map[string]string
 }
 
-// NewFileSystem creates new FileSystem objects
-func NewFileSystem() *FileSystem {
-	fileSystem := new(FileSystem)
-	return fileSystem
+func newFileSystem(rootPath string) *FileSystem {
+	return &FileSystem{rootPath, nil, map[string]string{}}
 }
 
-// Init initiates the FileSystem
-func (fileSystem *FileSystem) Init(rootPath string) error {
+func (fileSystem *FileSystem) init() error {
 	// Create root path.
-	err := fileSystem.CreateDirIfNotExists(rootPath)
+	err := fileSystem.createDirIfNotExists(fileSystem.rootPath)
 	if err != nil {
 		return err
 	}
-	fileSystem.rootPath = rootPath
 
 	// Creates the general upload-server log file.
-	logFile, err := os.Create(fileSystem.rootPath + "/upload-server.log")
+	logPath := fmt.Sprintf("%s/%d -> %s.log", fileSystem.rootPath, os.Getpid(), time.Now().String())
+	logFile, err := os.Create(logPath)
 	if err != nil {
 		return err
 	}
@@ -41,15 +44,13 @@ func (fileSystem *FileSystem) Init(rootPath string) error {
 	return nil
 }
 
-// Stop destroys the FileSystem
-func (fileSystem *FileSystem) Stop() {
+func (fileSystem *FileSystem) stop() {
 	if err := fileSystem.logFile.Close(); err != nil {
 		log.Fatal(err.Error())
 	}
 }
 
-// CreateDirIfNotExists creates the dir "path" if it doesn't exists
-func (fileSystem *FileSystem) CreateDirIfNotExists(path string) error {
+func (fileSystem *FileSystem) createDirIfNotExists(path string) error {
 	_, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -59,4 +60,31 @@ func (fileSystem *FileSystem) CreateDirIfNotExists(path string) error {
 		}
 	}
 	return nil
+}
+
+func (fileSystem *FileSystem) copyFile(originalFile io.Reader, fileName string) error {
+	fileUUID := uuid.New().String()
+	path := filepath.Join("data/", fileUUID)
+	createdFile, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+
+	createdFile, err = os.OpenFile(path, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(createdFile, originalFile)
+	if err != nil {
+		return err
+	}
+
+	fileSystem.indexes[fileName] = fileUUID
+
+	return nil
+}
+
+func (fileSystem *FileSystem) getIndexes() map[string]string {
+	return fileSystem.indexes
 }

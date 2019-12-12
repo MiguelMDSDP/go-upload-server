@@ -1,83 +1,62 @@
 package server
 
 import (
-	"io"
+	"encoding/json"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 
-	"github.com/google/uuid"
+	"github.com/MiguelMDSDP/upload-server/filesystem"
 )
+
+// LsItem - ls route item response structure
+type LsItem struct {
+	FileName string `json:"fileName"`
+	FileID   string `json:"fileID"`
+}
+
+// LsHandler is the function that treats the /ls route
+func LsHandler(writer http.ResponseWriter, request *http.Request) {
+	response := []LsItem{}
+
+	for fileName, fileID := range filesystem.Indexes() {
+		response = append(response, LsItem{fileName, fileID})
+	}
+
+	writer.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(writer).Encode(response)
+}
 
 // UploadHandler is the function that treats the /upload route
 func UploadHandler(writer http.ResponseWriter, request *http.Request) {
-	log.Print("**Starting upload")
-	// multipartReader, err := request.MultipartReader()
-	// if err != nil {
-	// 	log.Print(err.Error())
-	// 	writer.WriteHeader(http.StatusBadRequest)
-	// 	return
-	// }
+	log.Println("**Upload started.")
+
 	err := request.ParseMultipartForm(32 << 20) // 32Mb
 	if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
+		http.Error(writer, err.Error(), http.StatusBadRequest)
 	}
-	file, _, err := request.FormFile("file")
-	defer file.Close()
+
+	originalFile, handler, err := request.FormFile("file")
+	defer originalFile.Close()
 	if err != nil {
 		log.Println(err.Error())
 		writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	path := filepath.Join(".data/", uuid.New().String())
-	f, err := os.Create(path)
+
+	fileName := handler.Filename
+	fileSize := handler.Size
+	fileType := handler.Header.Get("Content-Type")
+
+	log.Printf("-> File name: %v", fileName)
+	log.Printf("-> File size: %v", fileSize)
+	log.Printf("-> File type: %v", fileType)
+
+	err = filesystem.CopyFile(originalFile, fileName)
 	if err != nil {
 		log.Println(err.Error())
 		writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	f, err = os.OpenFile(path, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
-	if err != nil {
-		log.Println(err.Error())
-		writer.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	io.Copy(f, file)
-	// buffer := make([]byte, 100000)
-	// var cBytes int
-	// for {
-	// 	part, err := multipartReader.NextPart()
-	// 	if err != nil {
-	// 		if err == io.EOF {
-	// 			log.Println(err.Error())
-	// 			file.Close()
-	// 			break
-	// 		}
-	// 		log.Println(err.Error())
-	// 		err = os.Remove(path)
-	// 		if err != nil {
-	// 			log.Println(err.Error())
-	// 		}
-	// 		writer.WriteHeader(http.StatusBadRequest)
-	// 		return
-	// 	}
-	// 	cBytes, err = part.Read(buffer)
-	// 	if err != nil {
-	// 		log.Println(err.Error)
-	// 		writer.WriteHeader(http.StatusBadRequest)
-	// 		return
-	// 	}
-	// 	_, err = file.Write(buffer[0:cBytes])
-	// 	if err != nil {
-	// 		log.Println(err.Error())
-	// 		err = os.Remove(path)
-	// 		if err != nil {
-	// 			log.Println(err.Error())
-	// 		}
-	// 		writer.WriteHeader(http.StatusInternalServerError)
-	// 		return
-	// 	}
-	// 	file.Sync()
-	// }
+
+	log.Println("**Uploaded successfully!")
 }
