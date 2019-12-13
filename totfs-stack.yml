@@ -8,7 +8,7 @@ services:
       - totfs
       - proxy
     volumes:
-      - ${DATA_PATH}/totfs/data:/src/data
+      - ${DATA_PATH}/totfs/data:/data
     deploy:
       labels:
         - "traefik.enable=true"
