@@ -1,0 +1,39 @@
+version: "3.2"
+services:
+
+  app:
+    build: .
+    image: deploytot/fs:0.1
+    networks:
+      - totfs
+      - proxy
+    volumes:
+      - ${DATA_PATH}/totfs/data:/src/data
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.backend=totfs-app"
+        - "traefik.frontend.rule=Host:fs.${DOMAINNAME}"
+        #- "traefik.frontend.entryPoints=http,https"
+        # - "traefik.frontend.rule=Host:${DOMAINNAME}"
+        # - "traefik.frontend.rule=PathPrefixStrip: /traefik"
+        # - "traefik.frontend.headers.customResponseHeaders=Access-Control-Allow-Origin:*"
+        # - "traefik.frontend.headers.customRequestHeaders=Access-Control-Allow-Origin:*"
+        - "traefik.docker.network=proxy"
+        - "traefik.port=8080"
+        - "traefik.frontend.passHostHeader=true"
+        #- "traefik.frontend.headers.SSLRedirect=true"
+        #- "traefik.frontend.headers.STSSeconds=315360000"
+        #- "traefik.frontend.headers.browserXSSFilter=true"
+        #- "traefik.frontend.headers.contentTypeNosniff=true"
+        #- "traefik.frontend.headers.forceSTSHeader=true"
+        #- "traefik.frontend.headers.SSLHost=annotation.${DOMAINNAME}"
+        #- "traefik.frontend.headers.STSIncludeSubdomains=true"
+        #- "traefik.frontend.headers.STSPreload=true"
+        #- "traefik.frontend.headers.frameDeny=true"
+
+networks:
+    totfs:
+      driver: overlay
+    proxy:
+      external: true
